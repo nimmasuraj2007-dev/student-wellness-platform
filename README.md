@@ -13,7 +13,7 @@ AI-powered mental health monitoring platform for students.
 
 ## How to Run
 
-Open `index.html` in any modern web browser.
+Open `indexv2.html` in any modern web browser.
 
 ## Technologies
 
