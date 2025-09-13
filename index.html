@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Wellness Platform</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        .mood-tracker {
+            grid-column: 1 / -1;
+        }
+
+        .mood-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .mood-btn {
+            padding: 15px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            background: white;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.3s ease;
+            font-size: 14px;
+        }
+
+        .mood-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .mood-btn.selected {
+            border-color: #667eea;
+            background: #667eea;
+            color: white;
+        }
+
+        .emoji {
+            font-size: 2rem;
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .check-in-form {
+            margin-top: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #555;
+        }
+
+        input,
+        textarea,
+        select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+
+        input:focus,
+        textarea:focus,
+        select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        textarea {
+            height: 80px;
+            resize: vertical;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .dashboard {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .metric {
+            text-align: center;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            border-left: 4px solid #667eea;
+        }
+
+        .metric-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 5px;
+        }
+
+        .metric-label {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .wellness-tips {
+            background: #e8f4fd;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+
+        .tip {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            border-left: 4px solid #667eea;
+        }
+
+        .tip:last-child {
+            margin-bottom: 0;
+        }
+
+        .history {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .history-item {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            border-left: 4px solid #667eea;
+        }
+
+        .history-date {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 5px;
+        }
+
+        .alert {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            color: #856404;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+
+            .dashboard {
+                grid-template-columns: 1fr;
+            }
+
+            .mood-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🌟 Student Wellness Platform</h1>
+            <p>Your daily mental health companion</p>
+        </div>
+
+        <div class="main-content">
+            <div class="card mood-tracker">
+                <h2>📊 Daily Mood Check-in</h2>
+
+                <div id="alert-container"></div>
+
+                <div class="mood-grid">
+                    <div class="mood-btn" data-mood="excellent">
+                        <span class="emoji">😄</span>
+                        Excellent
+                    </div>
+                    <div class="mood-btn" data-mood="good">
+                        <span class="emoji">😊</span>
+                        Good
+                    </div>
+                    <div class="mood-btn" data-mood="okay">
+                        <span class="emoji">😐</span>
+                        Okay
+                    </div>
+                    <div class="mood-btn" data-mood="low">
+                        <span class="emoji">😔</span>
+                        Low
+                    </div>
+                    <div class="mood-btn" data-mood="stressed">
+                        <span class="emoji">😰</span>
+                        Stressed
+                    </div>
+                    <div class="mood-btn" data-mood="anxious">
+                        <span class="emoji">😟</span>
+                        Anxious
+                    </div>
+                </div>
+
+                <div class="check-in-form">
+                    <div class="form-group">
+                        <label>Sleep Quality (1-10):</label>
+                        <input type="range" id="sleepQuality" min="1" max="10" value="7">
+                        <span id="sleepValue">7</span>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Stress Level (1-10):</label>
+                        <input type="range" id="stressLevel" min="1" max="10" value="5">
+                        <span id="stressValue">5</span>
+                    </div>
+
+                    <div class="form-group">
+                        <label>What's on your mind today?</label>
+                        <textarea id="dailyThoughts"
+                            placeholder="Share your thoughts, concerns, or what made you happy today..."></textarea>
+                    </div>
+
+                    <button class="btn" onclick="submitCheckIn()">Submit Check-in</button>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>📈 Wellness Dashboard</h2>
+                <div class="dashboard">
+                    <div class="metric">
+                        <div class="metric-value" id="avgMood">7.2</div>
+                        <div class="metric-label">Average Mood</div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric-value" id="checkInStreak">5</div>
+                        <div class="metric-label">Day Streak</div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric-value" id="avgSleep">6.8</div>
+                        <div class="metric-label">Avg Sleep Quality</div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric-value" id="avgStress">4.2</div>
+                        <div class="metric-label">Avg Stress Level</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>💡 Personalized Wellness Tips</h2>
+                <div class="wellness-tips" id="wellnessTips">
+                    <div class="tip">
+                        <strong>🧘 Mindfulness Tip:</strong> Try the 4-7-8 breathing technique: Inhale for 4 counts,
+                        hold for 7, exhale for 8.
+                    </div>
+                    <div class="tip">
+                        <strong>💤 Sleep Tip:</strong> Maintain a consistent sleep schedule, even on weekends.
+                    </div>
+                    <div class="tip">
+                        <strong>📚 Study Tip:</strong> Take a 5-minute break every 25 minutes of studying (Pomodoro
+                        technique).
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>📅 Recent Check-ins</h2>
+            <div class="history" id="checkInHistory">
+                <!-- History items will be populated by JavaScript -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let selectedMood = null;
+        let checkInData = JSON.parse(localStorage.getItem('checkInData')) || [];
+        let userStats = JSON.parse(localStorage.getItem('userStats')) || {
+            streak: 0,
+            totalCheckIns: 0,
+            avgMood: 0,
+            avgSleep: 0,
+            avgStress: 0
+        };
+
+        // Initialize the app
+        document.addEventListener('DOMContentLoaded', function () {
+            updateSliderValues();
+            loadCheckInHistory();
+            updateDashboard();
+            generatePersonalizedTips();
+            checkDailyCheckIn();
+        });
+
+        // Mood selection
+        document.querySelectorAll('.mood-btn').forEach(btn => {
+            btn.addEventListener('click', function () {
+                document.querySelectorAll('.mood-btn').forEach(b => b.classList.remove('selected'));
+                this.classList.add('selected');
+                selectedMood = this.dataset.mood;
+            });
+        });
+
+        // Update slider values
+        function updateSliderValues() {
+            const sleepSlider = document.getElementById('sleepQuality');
+            const stressSlider = document.getElementById('stressLevel');
+
+            sleepSlider.addEventListener('input', function () {
+                document.getElementById('sleepValue').textContent = this.value;
+            });
+
+            stressSlider.addEventListener('input', function () {
+                document.getElementById('stressValue').textContent = this.value;
+            });
+        }
+
+        // Submit check-in
+        function submitCheckIn() {
+            if (!selectedMood) {
+                showAlert('Please select your current mood first!', 'warning');
+                return;
+            }
+
+            const checkIn = {
+                date: new Date().toISOString(),
+                mood: selectedMood,
+                sleepQuality: parseInt(document.getElementById('sleepQuality').value),
+                stressLevel: parseInt(document.getElementById('stressLevel').value),
+                thoughts: document.getElementById('dailyThoughts').value,
+                moodScore: getMoodScore(selectedMood)
+            };
+
+            // Sentiment analysis simulation
+            checkIn.sentiment = analyzeSentiment(checkIn.thoughts);
+
+            checkInData.unshift(checkIn);
+            if (checkInData.length > 30) checkInData.splice(30); // Keep last 30 entries
+
+            localStorage.setItem('checkInData', JSON.stringify(checkInData));
+
+            updateUserStats();
+            updateDashboard();
+            loadCheckInHistory();
+            generatePersonalizedTips();
+
+            showAlert('Check-in submitted successfully! 🎉', 'success');
+            resetForm();
+        }
+
+        // Simple sentiment analysis
+        function analyzeSentiment(text) {
+            const positiveWords = ['happy', 'good', 'great', 'excellent', 'amazing', 'wonderful', 'excited', 'grateful'];
+            const negativeWords = ['sad', 'bad', 'terrible', 'awful', 'stressed', 'worried', 'anxious', 'depressed'];
+
+            const words = text.toLowerCase().split(' ');
+            let score = 0;
+
+            words.forEach(word => {
+                if (positiveWords.includes(word)) score += 1;
+                if (negativeWords.includes(word)) score -= 1;
+            });
+
+            if (score > 0) return 'positive';
+            if (score < 0) return 'negative';
+            return 'neutral';
+        }
+
+        // Get mood score for calculations
+        function getMoodScore(mood) {
+            const scores = {
+                'excellent': 10,
+                'good': 8,
+                'okay': 6,
+                'low': 4,
+                'stressed': 3,
+                'anxious': 2
+            };
+            return scores[mood] || 5;
+        }
+
+        // Update user statistics
+        function updateUserStats() {
+            userStats.totalCheckIns = checkInData.length;
+
+            if (checkInData.length > 0) {
+                userStats.avgMood = (checkInData.reduce((sum, entry) => sum + entry.moodScore, 0) / checkInData.length).toFixed(1);
+                userStats.avgSleep = (checkInData.reduce((sum, entry) => sum + entry.sleepQuality, 0) / checkInData.length).toFixed(1);
+                userStats.avgStress = (checkInData.reduce((sum, entry) => sum + entry.stressLevel, 0) / checkInData.length).toFixed(1);
+            }
+
+            // Calculate streak
+            userStats.streak = calculateStreak();
+
+            localStorage.setItem('userStats', JSON.stringify(userStats));
+        }
+
+        // Calculate check-in streak
+        function calculateStreak() {
+            if (checkInData.length === 0) return 0;
+
+            let streak = 1;
+            const today = new Date().toDateString();
+
+            for (let i = 1; i < checkInData.length; i++) {
+                const currentDate = new Date(checkInData[i - 1].date).toDateString();
+                const previousDate = new Date(checkInData[i].date).toDateString();
+
+                const diffTime = Math.abs(new Date(currentDate) - new Date(previousDate));
+                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+                if (diffDays === 1) {
+                    streak++;
+                } else {
+                    break;
+                }
+            }
+
+            return streak;
+        }
+
+        // Update dashboard metrics
+        function updateDashboard() {
+            document.getElementById('avgMood').textContent = userStats.avgMood || '0';
+            document.getElementById('checkInStreak').textContent = userStats.streak || '0';
+            document.getElementById('avgSleep').textContent = userStats.avgSleep || '0';
+            document.getElementById('avgStress').textContent = userStats.avgStress || '0';
+        }
+
+        // Load check-in history
+        function loadCheckInHistory() {
+            const historyContainer = document.getElementById('checkInHistory');
+
+            if (checkInData.length === 0) {
+                historyContainer.innerHTML = '<p style="text-align: center; color: #666;">No check-ins yet. Start your wellness journey today!</p>';
+                return;
+            }
+
+            historyContainer.innerHTML = checkInData.slice(0, 10).map(entry => {
+                const date = new Date(entry.date);
+                return `
+                    <div class="history-item">
+                        <div class="history-date">${date.toLocaleDateString()} - ${date.toLocaleTimeString()}</div>
+                        <div><strong>Mood:</strong> ${entry.mood} | <strong>Sleep:</strong> ${entry.sleepQuality}/10 | <strong>Stress:</strong> ${entry.stressLevel}/10</div>
+                        ${entry.thoughts ? `<div style="margin-top: 8px; font-style: italic;">"${entry.thoughts.substring(0, 100)}${entry.thoughts.length > 100 ? '...' : ''}"</div>` : ''}
+                        <div style="margin-top: 5px;"><span style="padding: 2px 8px; border-radius: 12px; background: ${getSentimentColor(entry.sentiment)}; color: white; font-size: 12px;">${entry.sentiment}</span></div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Get sentiment color
+        function getSentimentColor(sentiment) {
+            const colors = {
+                'positive': '#28a745',
+                'neutral': '#6c757d',
+                'negative': '#dc3545'
+            };
+            return colors[sentiment] || '#6c757d';
+        }
+
+        // Generate personalized wellness tips
+        function generatePersonalizedTips() {
+            const tips = [];
+
+            if (userStats.avgStress > 7) {
+                tips.push({
+                    icon: '🧘',
+                    type: 'Stress Management',
+                    tip: 'Your stress levels are high. Try progressive muscle relaxation or deep breathing exercises.'
+                });
+            }
+
+            if (userStats.avgSleep < 6) {
+                tips.push({
+                    icon: '💤',
+                    type: 'Sleep Improvement',
+                    tip: 'Your sleep quality could improve. Try avoiding screens 1 hour before bedtime.'
+                });
+            }
+
+            if (userStats.avgMood < 6) {
+                tips.push({
+                    icon: '🌈',
+                    type: 'Mood Boost',
+                    tip: 'Consider engaging in activities you enjoy or talking to a friend or counselor.'
+                });
+            }
+
+            // Add general tips if no specific issues
+            if (tips.length === 0) {
+                tips.push(
+                    {
+                        icon: '🏃',
+                        type: 'Physical Activity',
+                        tip: 'Great job maintaining your wellness! Try adding 20 minutes of physical activity daily.'
+                    },
+                    {
+                        icon: '🎯',
+                        type: 'Goal Setting',
+                        tip: 'Set small, achievable daily goals to maintain your positive momentum.'
+                    }
+                );
+            }
+
+            const tipsContainer = document.getElementById('wellnessTips');
+            tipsContainer.innerHTML = tips.map(tip => `
+                <div class="tip">
+                    <strong>${tip.icon} ${tip.type}:</strong> ${tip.tip}
+                </div>
+            `).join('');
+        }
+
+        // Show alerts
+        function showAlert(message, type) {
+            const alertContainer = document.getElementById('alert-container');
+            const alertClass = type === 'success' ? 'alert' : 'alert';
+            alertContainer.innerHTML = `<div class="${alertClass}">${message}</div>`;
+
+            setTimeout(() => {
+                alertContainer.innerHTML = '';
+            }, 3000);
+        }
+
+        // Check if user has checked in today
+        function checkDailyCheckIn() {
+            const today = new Date().toDateString();
+            const hasCheckedInToday = checkInData.some(entry =>
+                new Date(entry.date).toDateString() === today
+            );
+
+            if (!hasCheckedInToday && checkInData.length > 0) {
+                showAlert('Don\'t forget your daily wellness check-in! 🌟', 'info');
+            }
+        }
+
+        // Reset form after submission
+        function resetForm() {
+            document.querySelectorAll('.mood-btn').forEach(btn => btn.classList.remove('selected'));
+            selectedMood = null;
+            document.getElementById('sleepQuality').value = 7;
+            document.getElementById('stressLevel').value = 5;
+            document.getElementById('dailyThoughts').value = '';
+            document.getElementById('sleepValue').textContent = '7';
+            document.getElementById('stressValue').textContent = '5';
+        }
+    </script>
+</body>
+
+</html>
